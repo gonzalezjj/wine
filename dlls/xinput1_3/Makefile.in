@@ -1,7 +1,12 @@
 MODULE    = xinput1_3.dll
 IMPORTLIB = xinput
+IMPORTS   = uuid advapi32
 
 C_SRCS = \
-	xinput1_3_main.c
+        util.c \
+        core_vk.c \
+        core_vkqueue.c \
+        xinput1_3_main.c \
+
 
 RC_SRCS = version.rc
