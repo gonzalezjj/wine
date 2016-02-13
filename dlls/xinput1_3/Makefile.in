@@ -6,6 +6,7 @@ C_SRCS = \
         util.c \
         core_vk.c \
         core_vkqueue.c \
+        backend_evdev.c \
         backend_hid.c \
         xinput1_3_main.c \
 

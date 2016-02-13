@@ -6782,6 +6782,7 @@ for ac_header in \
 	sys/elf32.h \
 	sys/epoll.h \
 	sys/event.h \
+        sys/eventfd.h \
 	sys/exec_elf.h \
 	sys/filio.h \
 	sys/inotify.h \
@@ -6801,6 +6802,7 @@ for ac_header in \
 	sys/queue.h \
 	sys/resource.h \
 	sys/scsiio.h \
+        sys/select.h \
 	sys/shm.h \
 	sys/signal.h \
 	sys/socket.h \

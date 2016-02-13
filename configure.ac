@@ -467,6 +467,7 @@ AC_CHECK_HEADERS(\
 	sys/elf32.h \
 	sys/epoll.h \
 	sys/event.h \
+        sys/eventfd.h \
 	sys/exec_elf.h \
 	sys/filio.h \
 	sys/inotify.h \
@@ -486,6 +487,7 @@ AC_CHECK_HEADERS(\
 	sys/queue.h \
 	sys/resource.h \
 	sys/scsiio.h \
+        sys/select.h \
 	sys/shm.h \
 	sys/signal.h \
 	sys/socket.h \
