@@ -192,6 +192,9 @@ const int controller_definitions_count = sizeof(controller_definitions) / sizeof
 
 static struct EVDEV_SLOT slots[XUSER_MAX_COUNT];
 
+static const int FAILED_SCAN_RETRY_MIN_MS = 2000;
+static ULONGLONG failed_scan_timestamp;
+
 
 static BOOL get_bit(BITMAP_T *bitmap, unsigned int bit){
     unsigned int index = bit / (8 * sizeof(BITMAP_T));
@@ -564,6 +567,7 @@ void evdev_backend_initialize(void) {
         slots[i].event_fd = -1;
         slots[i].slot_index = i;
     }
+    failed_scan_timestamp = 0;
 }
 
 
@@ -573,6 +577,8 @@ void evdev_backend_initialize(void) {
  * Returns: TRUE if successful, FALSE if not (ie. if no new device is available)
  */
 BOOL evdev_backend_TryConnectDevice(DWORD target_slot_index, XINPUTW_DEV_CAPABILITIES *capabilities) {
+    ULONGLONG timestamp;
+
     int fd;
     int rc;
 
@@ -591,6 +597,10 @@ BOOL evdev_backend_TryConnectDevice(DWORD target_slot_index, XINPUTW_DEV_CAPABIL
     TRACE("slot %d\n", target_slot_index);
 
     if (slots[target_slot_index].fd >= 0) return TRUE;
+
+    timestamp = GetTickCount64();
+    if (failed_scan_timestamp > timestamp - FAILED_SCAN_RETRY_MIN_MS)
+        return FALSE;
 
     strcpy(dev_root_path, DEV_INPUT_PATH);
     strcat(dev_root_path, "/");
@@ -657,6 +667,8 @@ BOOL evdev_backend_TryConnectDevice(DWORD target_slot_index, XINPUTW_DEV_CAPABIL
             WARN("Could not create eventfd for slot %d\n", target_slot_index);
             close(slots[target_slot_index].fd);
             slots[target_slot_index].fd = -1;
+
+            failed_scan_timestamp = timestamp;
             return FALSE;
         }
 
@@ -670,6 +682,7 @@ BOOL evdev_backend_TryConnectDevice(DWORD target_slot_index, XINPUTW_DEV_CAPABIL
         return TRUE;
     }
 
+    failed_scan_timestamp = timestamp;
     return FALSE;
 }
 
