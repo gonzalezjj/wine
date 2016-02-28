@@ -30,6 +30,7 @@
 #include "xinput.h"
 
 #include "xinput_backend.h"
+#include "xinput_backend_hid.h"
 #include "xinput_util.h"
 #include "xinput_core.h"
 
@@ -58,6 +59,7 @@ typedef struct _XINPUTW_SLOT {
  * NULL-Terminated array of pointers to backends.
  */
 const XINPUTW_BACKEND *xinput_backends[] = {
+    &xinput_backend_hid,
     NULL
 };
 
