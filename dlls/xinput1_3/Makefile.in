@@ -1,6 +1,6 @@
 MODULE    = xinput1_3.dll
 IMPORTLIB = xinput
-IMPORTS   = uuid advapi32
+IMPORTS   = uuid advapi32 hid
 
 C_SRCS = \
         util.c \
@@ -8,6 +8,7 @@ C_SRCS = \
         core_vkqueue.c \
         backend_evdev.c \
         backend_hid.c \
+        hid_core_match.c \
         xinput1_3_main.c \
 
 
