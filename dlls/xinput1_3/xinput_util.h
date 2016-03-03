@@ -29,17 +29,24 @@ XINPUTW_VALUE xiw_util_ConvFromXIWValue(XINPUTW_VALUE value, XINPUTW_VALUE range
 void xiw_util_SetCapabilitiesAxis(uint8_t *axes, XINPUTW_EVENT_CODE code, XINPUTW_VALUE min, XINPUTW_VALUE max);
 void xiw_util_SetCapabilitiesBtn(WORD *buttons, XINPUTW_EVENT_CODE code, BOOL value);
 
+typedef struct _XIW_REG_KEYS {
+    /* The default (ie. global) xinput config key */
+    HKEY defkey;
+
+    /* The app-specific xinput config key */
+    HKEY appkey;
+} XIW_REG_KEYS;
+
 
 /*
  * Get the default and the app-specific config keys.
  *
- * defkey (out): The default (ie. global) xinput config key
- * appkey (out): The app-specific xinput config key
+ * keys (out): The keys to be loaded
  * subkey_path: Fetch a specific key under the XInput root keys. Can be set to NULL
  *
  * Taken and adapted from dlls/dinput/device.c
  */
-BOOL xiw_util_OpenCfgKeys(HKEY *defkey, HKEY *appkey, const char *subkey_path);
+BOOL xiw_util_OpenCfgKeys(XIW_REG_KEYS *keys, const char *subkey_path);
 
 /*
  * Get a config value from an app-specific registry key with a default fallback.
@@ -53,7 +60,7 @@ BOOL xiw_util_OpenCfgKeys(HKEY *defkey, HKEY *appkey, const char *subkey_path);
  *
  * Returns: ERROR_SUCCESS on success
  */
-LONG xiw_util_GetCfgValueGeneric(HKEY defkey, HKEY appkey, const char *name, BYTE *buffer, DWORD size, DWORD *type);
+LONG xiw_util_GetCfgValueGeneric(const XIW_REG_KEYS *keys, const char *name, BYTE *buffer, DWORD size, DWORD *type);
 
 
 /*
@@ -65,7 +72,7 @@ LONG xiw_util_GetCfgValueGeneric(HKEY defkey, HKEY appkey, const char *name, BYT
  *
  * Returns: The requested value or the default if it could not be found
  */
-DWORD xiw_util_GetCfgValueDW(HKEY defkey, HKEY appkey, const char *name, DWORD defaultValue);
+DWORD xiw_util_GetCfgValueDW(const XIW_REG_KEYS *keys, const char *name, DWORD defaultValue);
 
 
 #endif /* __WINE_DLLS_XINPUT_UTIL_H */

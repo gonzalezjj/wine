@@ -118,12 +118,12 @@ void xiw_util_SetCapabilitiesAxis(BYTE *axes, XINPUTW_EVENT_CODE code, XINPUTW_V
 /*
  * Taken and adapted from dlls/dinput/device.c
  */
-BOOL xiw_util_OpenCfgKeys(HKEY *defkey, HKEY *appkey, const char *subkey_path)
+BOOL xiw_util_OpenCfgKeys(XIW_REG_KEYS *keys, const char *subkey_path)
 {
     char buffer[MAX_PATH+16];
     DWORD len;
 
-    *appkey = 0;
+    keys->appkey = 0;
 
     /* Wine registry key: HKCU\Software\Wine\XInput */
     strcpy(buffer, "Software\\Wine\\XInput");
@@ -139,9 +139,9 @@ BOOL xiw_util_OpenCfgKeys(HKEY *defkey, HKEY *appkey, const char *subkey_path)
             strcat(buffer, subkey_path);
         }
     }
-    if (RegOpenKeyA(HKEY_CURRENT_USER, buffer, defkey) != ERROR_SUCCESS)
+    if (RegOpenKeyA(HKEY_CURRENT_USER, buffer, &keys->defkey) != ERROR_SUCCESS)
     {
-        *defkey = 0;
+        keys->defkey = 0;
     }
 
     len = GetModuleFileNameA(0, buffer, MAX_PATH);
@@ -175,48 +175,47 @@ BOOL xiw_util_OpenCfgKeys(HKEY *defkey, HKEY *appkey, const char *subkey_path)
                 }
             }
 
-            if (RegOpenKeyA(tmpkey, appname, appkey) != ERROR_SUCCESS)
+            if (RegOpenKeyA(tmpkey, appname, &keys->appkey) != ERROR_SUCCESS)
             {
-                *appkey = 0;
+                keys->appkey = 0;
             }
             RegCloseKey(tmpkey);
         }
     }
 
-    return *defkey || *appkey;
+    return keys->defkey || keys->appkey;
 }
 
 /*
  * Taken and adapted from dlls/dinput/device.c
  */
-LONG xiw_util_GetCfgValueGeneric(HKEY defkey, HKEY appkey, const char *name, BYTE *buffer, DWORD size, DWORD *type)
+LONG xiw_util_GetCfgValueGeneric(const XIW_REG_KEYS *keys, const char *name, BYTE *buffer, DWORD size, DWORD *type)
 {
     LONG rc;
 
     /* Try to load the app-specific key */
-    if (appkey)
+    if (keys->appkey)
     {
         /* If the key was not found, try the default. On any other return code, return that */
-        if ((rc = RegQueryValueExA(appkey, name, NULL, type, (LPBYTE)buffer, &size)) != ERROR_FILE_NOT_FOUND)
+        if ((rc = RegQueryValueExA(keys->appkey, name, NULL, type, (LPBYTE)buffer, &size)) != ERROR_FILE_NOT_FOUND)
         {
             return rc;
         }
     }
 
-    if (defkey)
+    if (keys->defkey)
     {
-        return RegQueryValueExA(defkey, name, NULL, type, (LPBYTE)buffer, &size);
+        return RegQueryValueExA(keys->defkey, name, NULL, type, (LPBYTE)buffer, &size);
     }
 
     return ERROR_FILE_NOT_FOUND;
 }
 
-DWORD xiw_util_GetCfgValueDW(HKEY defkey, HKEY appkey, const char *name, DWORD defaultValue)
+DWORD xiw_util_GetCfgValueDW(const XIW_REG_KEYS *keys, const char *name, DWORD defaultValue)
 {
     DWORD key_type, value;
     LONG rc;
-    rc = xiw_util_GetCfgValueGeneric(defkey, appkey, "ValueToButtonEpsilon",
-        (BYTE *)&value, sizeof(DWORD), &key_type);
+    rc = xiw_util_GetCfgValueGeneric(keys, name, (BYTE *)&value, sizeof(DWORD), &key_type);
     if (rc == ERROR_SUCCESS && key_type == REG_DWORD)
     {
         return value;
